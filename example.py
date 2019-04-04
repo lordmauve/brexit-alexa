@@ -6,6 +6,13 @@ Copied from https://realpython.com/python-speech-recognition/.
 import random
 import time
 
+
+from gtts import gTTS
+import os
+from io import BytesIO
+from pygame import mixer
+from tempfile import NamedTemporaryFile
+
 import speech_recognition as sr
 
 
@@ -41,6 +48,8 @@ def recognize_speech_from_mic(recognizer, microphone):
         "transcription": None
     }
 
+    print("Sending to Google")
+
     # try recognizing the speech in the recording
     # if a RequestError or UnknownValueError exception is caught,
     #     update the response object accordingly
@@ -57,7 +66,22 @@ def recognize_speech_from_mic(recognizer, microphone):
     return response
 
 
+def say(words):
+    with NamedTemporaryFile(suffix='.mp3') as mp3_fp:
+        tts = gTTS(text=words, lang='en')
+        tts.write_to_fp(mp3_fp)
+        mp3_fp.flush()
+        mixer.music.load(mp3_fp.name)
+        mixer.music.play()
+        while mixer.music.get_pos() > -1:
+            time.sleep(0.2)
+
+
 if __name__ == "__main__":
+
+    mixer.pre_init(25000, 16, 2)
+    mixer.init()
+
     # set the list of words, maxnumber of guesses, and prompt limit
     WORDS = ["apple", "banana", "grape", "orange", "mango", "lemon"]
     NUM_GUESSES = 3
@@ -78,7 +102,7 @@ if __name__ == "__main__":
     ).format(words=', '.join(WORDS), n=NUM_GUESSES)
 
     # show instructions and wait 3 seconds before starting the game
-    print(instructions)
+    say(instructions)
     time.sleep(3)
 
     for i in range(NUM_GUESSES):
