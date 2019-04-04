@@ -17,9 +17,17 @@ import speech_recognition as sr
 
 
 PHRASES = [
-    "Brexit means Brexit",
+    "We demand a permanent customs union.",
+    "No border in the Irish sea.",
+    "Blue passports.",
     "Strong and stable",
     "I'm bringing my deal back to parliament for a meaningful vote",
+    "After all the division this country must come together.",
+    "We will leave the EU on the twenty-ninth of March.",
+]
+
+GREETINGS = [
+    'Hey!', 'Wait a second!', 'Did you know?', 'Speaking about Brexit...',
 ]
 
 
@@ -36,18 +44,20 @@ def recognize_speech_from_mic(recognizer, microphone):
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source)
       
-    # that sends to Google
-    while True: 
-        with microphone as source:
+        # that sends to Google
+        while True: 
             audio = recognizer.record (source, duration = 3) 
-        try:
-            text = recognizer.recognize_google (audio)
-        except sr.UnknownValueError:
-            continue
+            try:
+                text = recognizer.recognize_google (audio)
+            except sr.UnknownValueError:
+                continue
 
-        print(text)
-        if 'brexit' in text:
-            say(random.choice(PHRASES))
+
+            print(text)
+            if 'brexit' in text:
+                greeting = random.choice(GREETINGS)
+                phrase = random.choice(PHRASES)
+                say(f'{greeting} {phrase}')
 
     return response
 
@@ -68,54 +78,10 @@ if __name__ == "__main__":
     mixer.pre_init(25000, 16, 2)
     mixer.init()
 
-    # set the list of words, maxnumber of guesses, and prompt limit
-    WORDS = ["apple", "banana", "grape", "orange", "mango", "lemon"]
-    NUM_GUESSES = 3
-    PROMPT_LIMIT = 5
-
     # create recognizer and mic instances
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
 
-
-    for i in range(NUM_GUESSES):
-        # get the guess from the user
-        # if a transcription is returned, break out of the loop and
-        #     continue
-        # if no transcription returned and API request failed, break
-        #     loop and continue
-        # if API request succeeded but no transcription was returned,
-        #     re-prompt the user to say their guess again. Do this up
-        #     to PROMPT_LIMIT times
-        for j in range(PROMPT_LIMIT):
-            say('Guess {}. Speak!'.format(i+1))
-            guess = recognize_speech_from_mic(recognizer, microphone)
-            if guess["transcription"]:
-                break
-            if not guess["success"]:
-                break
-            say("I didn't catch that. What did you say?\n")
-
-        # if there was an error, stop the game
-        if guess["error"]:
-            print("ERROR: {}".format(guess["error"]))
-            break
-
-        # show the user the transcription
-        say("You said: {}".format(guess["transcription"]))
-
-        # determine if guess is correct and if any attempts remain
-        guess_is_correct = guess["transcription"].lower() == word.lower()
-        user_has_more_attempts = i < NUM_GUESSES - 1
-
-        # determine if the user has won the game
-        # if not, repeat the loop if user has more attempts
-        # if no attempts left, the user loses the game
-        if guess_is_correct:
-            say("Correct! You win!".format(word))
-            break
-        elif user_has_more_attempts:
-            say("Incorrect. Try again.\n")
-        else:
-            say("Sorry, you lose!\nI was thinking of '{}'.".format(word))
-            break
+    say("Hi, I'm Brexa. What would you like to know?")
+    guess = recognize_speech_from_mic(recognizer, microphone)
+   
