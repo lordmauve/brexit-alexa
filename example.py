@@ -16,18 +16,14 @@ from tempfile import NamedTemporaryFile
 import speech_recognition as sr
 
 
-def recognize_speech_from_mic(recognizer, microphone):
-    """Transcribe speech from recorded from `microphone`.
+PHRASES = [
+    "Brexit means Brexit",
+    "Strong and stable",
+    "I'm bringing my deal back to parliament for a meaningful vote",
+]
 
-    Returns a dictionary with three keys:
-    "success": a boolean indicating whether or not the API request was
-               successful
-    "error":   `None` if no error occured, otherwise a string containing
-               an error message if the API could not be reached or
-               speech was unrecognizable
-    "transcription": `None` if speech could not be transcribed,
-               otherwise a string containing the transcribed text
-    """
+
+def recognize_speech_from_mic(recognizer, microphone):
     # check that recognizer and microphone arguments are appropriate type
     if not isinstance(recognizer, sr.Recognizer):
         raise TypeError("`recognizer` must be `Recognizer` instance")
@@ -39,29 +35,19 @@ def recognize_speech_from_mic(recognizer, microphone):
     # from the microphone
     with microphone as source:
         recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
+      
+    # that sends to Google
+    while True: 
+        with microphone as source:
+            audio = recognizer.record (source, duration = 3) 
+        try:
+            text = recognizer.recognize_google (audio)
+        except sr.UnknownValueError:
+            continue
 
-    # set up the response object
-    response = {
-        "success": True,
-        "error": None,
-        "transcription": None
-    }
-
-    print("Sending to Google")
-
-    # try recognizing the speech in the recording
-    # if a RequestError or UnknownValueError exception is caught,
-    #     update the response object accordingly
-    try:
-        response["transcription"] = recognizer.recognize_google(audio)
-    except sr.RequestError:
-        # API was unreachable or unresponsive
-        response["success"] = False
-        response["error"] = "API unavailable"
-    except sr.UnknownValueError:
-        # speech was unintelligible
-        response["error"] = "Unable to recognize speech"
+        print(text)
+        if 'brexit' in text:
+            say(random.choice(PHRASES))
 
     return response
 
@@ -91,19 +77,6 @@ if __name__ == "__main__":
     recognizer = sr.Recognizer()
     microphone = sr.Microphone()
 
-    # get a random word from the list
-    word = random.choice(WORDS)
-
-    # format the instructions string
-    instructions = (
-        "I'm thinking of one of these words:\n"
-        "{words}\n"
-        "You have {n} tries to guess which one.\n"
-    ).format(words=', '.join(WORDS), n=NUM_GUESSES)
-
-    # show instructions and wait 3 seconds before starting the game
-    say(instructions)
-    time.sleep(3)
 
     for i in range(NUM_GUESSES):
         # get the guess from the user
