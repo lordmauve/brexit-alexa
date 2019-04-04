@@ -115,13 +115,13 @@ if __name__ == "__main__":
         #     re-prompt the user to say their guess again. Do this up
         #     to PROMPT_LIMIT times
         for j in range(PROMPT_LIMIT):
-            print('Guess {}. Speak!'.format(i+1))
+            say('Guess {}. Speak!'.format(i+1))
             guess = recognize_speech_from_mic(recognizer, microphone)
             if guess["transcription"]:
                 break
             if not guess["success"]:
                 break
-            print("I didn't catch that. What did you say?\n")
+            say("I didn't catch that. What did you say?\n")
 
         # if there was an error, stop the game
         if guess["error"]:
@@ -129,7 +129,7 @@ if __name__ == "__main__":
             break
 
         # show the user the transcription
-        print("You said: {}".format(guess["transcription"]))
+        say("You said: {}".format(guess["transcription"]))
 
         # determine if guess is correct and if any attempts remain
         guess_is_correct = guess["transcription"].lower() == word.lower()
@@ -139,10 +139,10 @@ if __name__ == "__main__":
         # if not, repeat the loop if user has more attempts
         # if no attempts left, the user loses the game
         if guess_is_correct:
-            print("Correct! You win!".format(word))
+            say("Correct! You win!".format(word))
             break
         elif user_has_more_attempts:
-            print("Incorrect. Try again.\n")
+            say("Incorrect. Try again.\n")
         else:
-            print("Sorry, you lose!\nI was thinking of '{}'.".format(word))
+            say("Sorry, you lose!\nI was thinking of '{}'.".format(word))
             break
